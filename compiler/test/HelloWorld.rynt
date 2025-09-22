@@ -1,0 +1,36 @@
+/*
+Keywords: declare, import, public, class, static, int, string, private, var, return
+Syntax:
+
+1. declare(package|macro|alias) [package in reversed domain|macro name and implementation|alias and aliased by target]
+Usage: declare(package) org.remimwen.test;
+       declare(macro) FORCE_INLINE {
+           inline
+       }
+       declare(alias) AdvancedPair<Tp, Tp> = org.might_a_company.pair<Tp>(new Allocator(this))
+
+2. import [package name]: * means all subpackage
+Usage: import ryntra.io.out;
+
+3. class and functions should ALWAYS has a access modifier (public and private)
+4. Functions and variables can be declared in these ways:
+    a. Type Prefix: int a = 10;
+    b. Type Suffix: var a : int = 10;
+    ** NOTE: Functions can't be in Suffix Mode. So if user declared `func IAmAFunction(int a) : int` is not legal.
+5. Package `io` only has one member now, because this is a demo version that implemented my idea, so don't be
+   frustrated about the standard template. You only need to implement the stream and `io.out`.
+6. `return` should always be in the last of `main()`. If `return` isn't in a if...else... structure, anything
+   under `return` is ignored.
+7. `main()` should ALWAYS declared either in `public static int main(string[] args)` or `public static int main()`.
+*/
+
+declare(package) org.remimwen.test;
+
+import ryntra.io.*;
+
+public class main {
+	public static int main(string[] args) {
+		io.out << "Hello World!ahaha \n";
+		return 0;
+	}
+}
