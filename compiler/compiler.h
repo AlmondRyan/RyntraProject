@@ -3,6 +3,7 @@
 
 #include "lexer/lexer.h"
 #include "parser/parser.h"
+#include "codegen/llvm_codegen.h"
 #include <memory>
 #include <string>
 
@@ -20,6 +21,13 @@ namespace Ryntra::Compiler {
         // Utility methods
         void printTokens();
         void printAST();
+        
+        // LLVM code generation
+        void generateLLVMIR();
+        std::unique_ptr<LLVMCodeGenerator> compileLLVM();
+        
+        // Complete compilation to executable
+        bool compileToExecutable(const std::string& outputName = "program");
 
         // Static method to compile from file
         static std::unique_ptr<Program> compileFromFile(const std::string &filename);

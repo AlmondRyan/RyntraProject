@@ -43,6 +43,35 @@ namespace Ryntra::Compiler {
         }
     }
 
+    void RyntraCompiler::generateLLVMIR() {
+        auto ast = compile();
+        if (ast) {
+            LLVMCodeGenerator codegen("RyntraModule");
+            codegen.generateCode(*ast);
+            
+            std::cout << "\n=== Generated LLVM IR ===" << std::endl;
+            codegen.printIR();
+        }
+    }
+
+    std::unique_ptr<LLVMCodeGenerator> RyntraCompiler::compileLLVM() {
+        auto ast = compile();
+        if (ast) {
+            auto codegen = std::make_unique<LLVMCodeGenerator>("RyntraModule");
+            codegen->generateCode(*ast);
+            return codegen;
+        }
+        return nullptr;
+    }
+
+    bool RyntraCompiler::compileToExecutable(const std::string& outputName) {
+        auto codegen = compileLLVM();
+        if (codegen) {
+            return codegen->compileToExecutable(outputName);
+        }
+        return false;
+    }
+
     std::unique_ptr<Program> RyntraCompiler::compileFromFile(const std::string &filename) {
         std::ifstream file(filename);
         if (!file.is_open()) {

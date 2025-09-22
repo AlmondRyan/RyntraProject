@@ -32,6 +32,12 @@ int main() {
             
             std::cout << "\n=== AST ===" << std::endl;
             compiler.printAST();
+
+            std::cout << std::endl << "Generated LLVM IR" << std::endl;
+            compiler.generateLLVMIR();
+            compiler.compileLLVM();
+
+
         }
     } else {
         std::cout << "\n=== Compilation Failed ===" << std::endl;

@@ -30,7 +30,7 @@ import ryntra.io.*;
 
 public class main {
 	public static int main(string[] args) {
-		io.out << "Hello World!ahaha \n";
+		io.out << "Hello World!!! \n";
 		return 0;
 	}
 }
