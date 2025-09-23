@@ -1,7 +1,6 @@
 #include "ast.h"
 
 namespace Ryntra::Compiler {
-    // Program
     void Program::accept(ASTVisitor &visitor) {
         visitor.visit(*this);
     }
@@ -10,7 +9,6 @@ namespace Ryntra::Compiler {
         return "Program";
     }
 
-    // PackageDeclaration
     void PackageDeclaration::accept(ASTVisitor &visitor) {
         visitor.visit(*this);
     }
@@ -19,7 +17,6 @@ namespace Ryntra::Compiler {
         return "PackageDeclaration: " + packageName;
     }
 
-    // ImportDeclaration
     void ImportDeclaration::accept(ASTVisitor &visitor) {
         visitor.visit(*this);
     }
@@ -28,7 +25,6 @@ namespace Ryntra::Compiler {
         return "ImportDeclaration: " + importPath;
     }
 
-    // ClassDeclaration
     void ClassDeclaration::accept(ASTVisitor &visitor) {
         visitor.visit(*this);
     }
@@ -37,7 +33,6 @@ namespace Ryntra::Compiler {
         return accessModifier + " class " + className;
     }
 
-    // MethodDeclaration
     void MethodDeclaration::accept(ASTVisitor &visitor) {
         visitor.visit(*this);
     }
@@ -56,7 +51,6 @@ namespace Ryntra::Compiler {
         return result;
     }
 
-    // ExpressionStatement
     void ExpressionStatement::accept(ASTVisitor &visitor) {
         visitor.visit(*this);
     }
@@ -65,7 +59,6 @@ namespace Ryntra::Compiler {
         return "ExpressionStatement";
     }
 
-    // BinaryExpression
     void BinaryExpression::accept(ASTVisitor &visitor) {
         visitor.visit(*this);
     }
@@ -74,7 +67,6 @@ namespace Ryntra::Compiler {
         return "BinaryExpression: " + operator_;
     }
 
-    // Identifier
     void Identifier::accept(ASTVisitor &visitor) {
         visitor.visit(*this);
     }
@@ -83,7 +75,6 @@ namespace Ryntra::Compiler {
         return "Identifier: " + name;
     }
 
-    // StringLiteral
     void StringLiteral::accept(ASTVisitor &visitor) {
         visitor.visit(*this);
     }
@@ -92,7 +83,6 @@ namespace Ryntra::Compiler {
         return "StringLiteral: \"" + value + "\"";
     }
 
-    // NumberLiteral
     void NumberLiteral::accept(ASTVisitor &visitor) {
         visitor.visit(*this);
     }
@@ -101,7 +91,6 @@ namespace Ryntra::Compiler {
         return "NumberLiteral: " + value;
     }
 
-    // ReturnStatement
     void ReturnStatement::accept(ASTVisitor &visitor) {
         visitor.visit(*this);
     }
@@ -109,5 +98,4 @@ namespace Ryntra::Compiler {
     std::string ReturnStatement::toString() const {
         return "ReturnStatement";
     }
-
 } // namespace Ryntra::Compiler

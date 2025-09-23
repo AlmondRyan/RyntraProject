@@ -1,4 +1,5 @@
 #include "parser.h"
+#include "../../utils/ErrorHandler.h"
 #include <iostream>
 #include <stdexcept>
 
@@ -14,7 +15,7 @@ namespace Ryntra::Compiler {
     }
 
     Token &Parser::peekToken(int offset) {
-        size_t pos = current + offset;
+        const size_t pos = current + offset;
         if (pos >= tokens.size()) {
             static Token eofToken(TokenType::EOF_TOKEN);
             return eofToken;
@@ -38,15 +39,21 @@ namespace Ryntra::Compiler {
         if (current < tokens.size()) {
             return tokens[current++];
         }
-        return Token(TokenType::EOF_TOKEN);
+        return {TokenType::EOF_TOKEN};
     }
 
     Token Parser::consume(TokenType type, const std::string &message) {
         if (check(type)) {
             return advance();
         }
-        throw std::runtime_error("Parse error: " + message + " at line " +
-                                 std::to_string(currentToken().line));
+
+        Utils::globalErrorHandler.makeError(
+            "parser",
+            message,
+            currentToken().line,
+            currentToken().column);
+
+        return {TokenType::UNKNOWN};
     }
 
     std::unique_ptr<Program> Parser::parse() {
@@ -57,8 +64,7 @@ namespace Ryntra::Compiler {
         auto program = std::make_unique<Program>();
 
         while (!check(TokenType::EOF_TOKEN)) {
-            auto decl = parseDeclaration();
-            if (decl) {
+            if (auto decl = parseDeclaration()) {
                 program->declarations.push_back(std::move(decl));
             }
         }
@@ -71,14 +77,19 @@ namespace Ryntra::Compiler {
             consume(TokenType::LPAREN, "Expected '(' after 'declare'");
 
             if (match(TokenType::IDENTIFIER)) {
-                std::string declType = tokens[current - 1].value;
+                const std::string declType = tokens[current - 1].value;
                 consume(TokenType::RPAREN, "Expected ')' after declare type");
 
                 if (declType == "package") {
                     return parsePackageDeclaration();
                 }
             }
-            throw std::runtime_error("Unsupported declare type");
+            Utils::globalErrorHandler.makeError(
+                "parser",
+                "Unsupported declare type",
+                currentToken().line,
+                currentToken().column);
+            return nullptr;
         }
 
         if (match(TokenType::IMPORT)) {
@@ -89,17 +100,19 @@ namespace Ryntra::Compiler {
             return parseClassDeclaration();
         }
 
-        throw std::runtime_error("Unexpected token in declaration");
+        Utils::globalErrorHandler.makeError(
+            "parser",
+            "Unexpected token in declaration",
+            currentToken().line,
+            currentToken().column);
+        return nullptr;
     }
 
     std::unique_ptr<PackageDeclaration> Parser::parsePackageDeclaration() {
-        std::string packageName;
-
         // Parse package name (e.g., org.remimwen.test)
-        Token firstPart = consume(TokenType::IDENTIFIER, "Expected package name");
-        packageName = firstPart.value;
+        const Token firstPart = consume(TokenType::IDENTIFIER, "Expected package name");
+        std::string packageName = firstPart.value;
 
-        // Handle dotted package name
         while (check(TokenType::DOT)) {
             advance(); // consume '.'
             packageName += ".";
@@ -114,11 +127,8 @@ namespace Ryntra::Compiler {
     }
 
     std::unique_ptr<ImportDeclaration> Parser::parseImportDeclaration() {
-        std::string importPath;
-
-        // Parse import path (e.g., ryntra.io.*)
-        Token firstPart = consume(TokenType::IDENTIFIER, "Expected import path");
-        importPath = firstPart.value;
+        const Token firstPart = consume(TokenType::IDENTIFIER, "Expected import path");
+        std::string importPath = firstPart.value;
 
         // Handle dotted path and wildcard
         while (check(TokenType::DOT)) {
@@ -133,7 +143,12 @@ namespace Ryntra::Compiler {
                 Token part = advance();
                 importPath += part.value;
             } else {
-                throw std::runtime_error("Expected identifier or '*' after '.' in import path");
+                Ryntra::Utils::globalErrorHandler.makeError(
+                    "parser",
+                    "Expected identifier or '*' after '.' in import path",
+                    currentToken().line,
+                    currentToken().column);
+                return nullptr;
             }
         }
 
@@ -152,8 +167,7 @@ namespace Ryntra::Compiler {
         consume(TokenType::LBRACE, "Expected '{' after class name");
 
         while (!check(TokenType::RBRACE) && !check(TokenType::EOF_TOKEN)) {
-            auto member = parseMethodDeclaration();
-            if (member) {
+            if (auto member = parseMethodDeclaration()) {
                 classDecl->members.push_back(std::move(member));
             }
         }
@@ -171,7 +185,6 @@ namespace Ryntra::Compiler {
             isStatic = true;
         }
 
-        // Parse return type (can be keyword like 'int', 'string' or identifier)
         std::string returnTypeStr = parseType();
 
         Token methodName = consume(TokenType::IDENTIFIER, "Expected method name");
@@ -181,10 +194,8 @@ namespace Ryntra::Compiler {
 
         consume(TokenType::LPAREN, "Expected '(' after method name");
 
-        // Parse parameters
         if (!check(TokenType::RPAREN)) {
             do {
-                // Parse parameter type (can be keyword like 'int', 'string' or identifier)
                 std::string paramTypeStr = parseType();
 
                 if (check(TokenType::LBRACKET)) {
@@ -203,8 +214,7 @@ namespace Ryntra::Compiler {
 
         // Parse method body
         while (!check(TokenType::RBRACE) && !check(TokenType::EOF_TOKEN)) {
-            auto stmt = parseStatement();
-            if (stmt) {
+            if (auto stmt = parseStatement()) {
                 methodDecl->body.push_back(std::move(stmt));
             }
         }
@@ -274,16 +284,26 @@ namespace Ryntra::Compiler {
             return std::make_unique<Identifier>(identifierName);
         }
 
-        throw std::runtime_error("Unexpected token in expression");
+        Ryntra::Utils::globalErrorHandler.makeError(
+            "parser",
+            "Unexpected token in expression",
+            currentToken().line,
+            currentToken().column);
+        return nullptr;
     }
 
     std::string Parser::parseType() {
         if (check(TokenType::INT) || check(TokenType::STRING) || check(TokenType::IDENTIFIER)) {
             Token typeToken = advance();
             return typeToken.value;
+            // ReSharper disable once CppRedundantElseKeywordInsideCompoundStatement
         } else {
-            throw std::runtime_error("Parse error: Expected type at line " +
-                                     std::to_string(currentToken().line));
+            Utils::globalErrorHandler.makeError(
+                "parser",
+                "Expected type",
+                currentToken().line,
+                currentToken().column);
+            return "unknown";
         }
     }
 
@@ -296,7 +316,7 @@ namespace Ryntra::Compiler {
         if (!node)
             return;
 
-        std::string indentStr(indent * 2, ' ');
+        const std::string indentStr(indent * 2, ' ');
         std::cout << indentStr << node->toString() << std::endl;
 
         // Handle specific node types to display children
