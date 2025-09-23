@@ -1,5 +1,5 @@
-#ifndef PARSER_H
-#define PARSER_H
+#ifndef RYNTRA_COMPILER_PARSER_PARSER_H
+#define RYNTRA_COMPILER_PARSER_PARSER_H
 
 #include "../lexer/token.h"
 #include "ast.h"
@@ -37,7 +37,7 @@ namespace Ryntra::Compiler {
         std::string parseType();
 
     public:
-        Parser(const std::vector<Token> &tokenList);
+        explicit Parser(const std::vector<Token> &tokenList);
         std::unique_ptr<Program> parse();
         void                     displayAST(const std::unique_ptr<Program> &program, int indent = 0);
 
@@ -47,4 +47,4 @@ namespace Ryntra::Compiler {
 
 } // namespace Ryntra::Compiler
 
-#endif // PARSER_H
+#endif // RYNTRA_COMPILER_PARSER_PARSER_H

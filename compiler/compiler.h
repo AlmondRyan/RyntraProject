@@ -1,9 +1,9 @@
-#ifndef COMPILER_H
-#define COMPILER_H
+#ifndef RYNTRA_COMPILER_COMPILER_H
+#define RYNTRA_COMPILER_COMPILER_H
 
+#include "codegen/llvm_codegen.h"
 #include "lexer/lexer.h"
 #include "parser/parser.h"
-#include "codegen/llvm_codegen.h"
 #include <memory>
 #include <string>
 
@@ -13,26 +13,21 @@ namespace Ryntra::Compiler {
         std::string sourceCode;
 
     public:
-        RyntraCompiler(const std::string &source);
+        explicit RyntraCompiler(const std::string &source);
 
-        // Compile the source code and return AST
-        std::unique_ptr<Program> compile();
+        [[nodiscard]] std::unique_ptr<Program> compile() const;
 
-        // Utility methods
-        void printTokens();
+        void printTokens() const;
         void printAST();
-        
-        // LLVM code generation
-        void generateLLVMIR();
-        std::unique_ptr<LLVMCodeGenerator> compileLLVM();
-        
-        // Complete compilation to executable
-        bool compileToExecutable(const std::string& outputName = "program");
 
-        // Static method to compile from file
+        void                               generateLLVMIR();
+        std::unique_ptr<LLVMCodeGenerator> compileLLVM();
+
+        bool compileToExecutable(const std::string &outputName = "program");
+
         static std::unique_ptr<Program> compileFromFile(const std::string &filename);
     };
 
 } // namespace Ryntra::Compiler
 
-#endif // COMPILER_H
+#endif // RYNTRA_COMPILER_COMPILER_H

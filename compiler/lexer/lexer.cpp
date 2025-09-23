@@ -1,4 +1,5 @@
 #include "lexer.h"
+#include "../../utils/ErrorHandler.h"
 #include <cctype>
 
 namespace Ryntra::Compiler {
@@ -224,3 +225,4 @@ namespace Ryntra::Compiler {
     }
 
 } // namespace Ryntra::Compiler
+// } // namespace Ryntra

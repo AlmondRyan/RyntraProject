@@ -10,6 +10,12 @@ A full development toolchain for The Ryntra Programming Language.
 - **Code Generator**: LLVM IR generation from AST using visitor pattern
 - **Namespace**: All components organized under `Ryntra::Compiler` namespace
 
+### Linker (`rplink/`)
+- **RPLink**: Custom linker for Ryntra object files
+- **Object File Support**: ELF, COFF, and Mach-O format support
+- **Symbol Resolution**: Global symbol table and relocation handling
+- **Namespace**: All components organized under `Ryntra::RPLink` namespace
+
 ### Supported Language Features
 - Package declarations: `declare(package) org.example;`
 - Import statements: `import ryntra.io.*;`
@@ -30,7 +36,12 @@ A full development toolchain for The Ryntra Programming Language.
 mkdir build
 cd build
 cmake ..
-make
+
+# Build specific target (recommended)
+cmake --build . --target RyntraCompiler
+
+# Or build all targets
+cmake --build .
 ```
 
 ### Environment Variables
@@ -42,16 +53,16 @@ Set one of these for LLVM detection:
 
 ### Compile and Run
 
-#### Using the CLI Compiler (rycc)
+#### Using the CLI Compiler (RyntraCompiler)
 ```bash
 # Basic compilation
-rycc -i compiler/test/HelloWorld.rynt -o HelloWorld
+./RyntraCompiler -i compiler/test/HelloWorld.rynt -o HelloWorld
 
 # With debug information
-rycc -i source.rynt -o program --show-token --show-ast --show-llvm-ir
+./RyntraCompiler -i source.rynt -o program --show-token --show-ast --show-llvm-ir
 
 # Show help
-rycc --help
+./RyntraCompiler --help
 ```
 
 #### Development Tests
@@ -111,9 +122,24 @@ entry:
 **CLI Usage:**
 ```bash
 # Compile HelloWorld program
-rycc -i compiler/test/HelloWorld.rynt -o HelloWorld
+./RyntraCompiler -i compiler/test/HelloWorld.rynt -o HelloWorld
 
 # Run the generated executable
 ./HelloWorld.exe
 # Output: Hello World!
+```
+
+### Build Options
+```bash
+# Build only the compiler
+cmake -DBUILD_COMPILER=ON -DBUILD_RPLINK=OFF -DBUILD_TESTS=OFF ..
+
+# Build only the linker
+cmake -DBUILD_RPLINK=ON -DBUILD_COMPILER=OFF -DBUILD_TESTS=OFF ..
+
+# Build compiler and linker
+cmake -DBUILD_COMPILER=ON -DBUILD_RPLINK=ON -DBUILD_TESTS=OFF ..
+
+# Build everything (default)
+cmake ..
 ```
