@@ -1,5 +1,5 @@
-#ifndef LEXER_H
-#define LEXER_H
+#ifndef RYNTRA_COMPILER_LEXER_LEXER_H
+#define RYNTRA_COMPILER_LEXER_LEXER_H
 
 #include "token.h"
 #include <string>
@@ -23,11 +23,11 @@ namespace Ryntra::Compiler {
         Token readIdentifier();
 
     public:
-        Lexer(const std::string &source);
+        explicit Lexer(const std::string &source);
         Token              nextToken();
         std::vector<Token> tokenize();
     };
 
 } // namespace Ryntra::Compiler
 
-#endif // LEXER_H
+#endif // RYNTRA_COMPILER_LEXER_LEXER_H
