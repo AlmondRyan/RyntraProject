@@ -2,8 +2,7 @@
 
 ### First Major Update: All basic branch of Ryntra Language will be done:
 
-- [√] Make my compiler generate "Hello World."
-- [*] Make a simple linker that like `lld`
+- [✅] Make my compiler generate "Hello World."
 - [*] Make it support integer variable declaration and basic plus / minus operation
 - [*] Make it support integer variable times and division operation
 - [*] Make it support basic `for` loop.
