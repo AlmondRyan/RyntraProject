@@ -1,5 +1,5 @@
-#ifndef TOKEN_H
-#define TOKEN_H
+#ifndef RYNTRA_COMPILER_LEXER_TOKEN_H
+#define RYNTRA_COMPILER_LEXER_TOKEN_H
 
 #include <string>
 #include <unordered_map>
@@ -72,4 +72,4 @@ namespace Ryntra::Compiler {
 
 } // namespace Ryntra::Compiler
 
-#endif // TOKEN_H
+#endif // RYNTRA_COMPILER_LEXER_TOKEN_H
