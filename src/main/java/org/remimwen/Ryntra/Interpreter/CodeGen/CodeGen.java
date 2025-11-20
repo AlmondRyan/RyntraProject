@@ -5,6 +5,7 @@ import org.remimwen.Ryntra.RyntraParser;
 import org.remimwen.Ryntra.Interpreter.VM.Command;
 import org.remimwen.Ryntra.Interpreter.VM.OpCodes;
 import org.remimwen.Ryntra.Interpreter.VM.utils.ConstantPool;
+import org.remimwen.Ryntra.Interpreter.BuiltinFunctions;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -24,57 +25,68 @@ public class CodeGen extends RyntraBaseVisitor<Void> {
 
     @Override
     public Void visitProgram(RyntraParser.ProgramContext ctx) {
-        // 访问所有 print 语句
+        // Visit all the statements
         visitChildren(ctx);
         
-        // 添加 HALT 指令结束程序
+        // Add HALT command to terminate the program
         commands.add(new Command(OpCodes.HALT, new ArrayList<>()));
         
         return null;
     }
 
     @Override
-    public Void visitPrintStmt(RyntraParser.PrintStmtContext ctx) {
-        // 检查是否有表达式参数
-        if (ctx.expr() != null) {
-            // 访问表达式，生成加载常量的指令
-            visit(ctx.expr());
-            
-            // 生成 NATIVE_CALL 指令来打印
-            commands.add(new Command(OpCodes.NATIVE_CALL, Arrays.asList("stdout")));
-        } else {
-            // 如果没有参数，打印空行
-            // 加载空字符串到常量池
-            int index = constantPool.addString("");
-            commands.add(new Command(OpCodes.LOAD_CONST, Arrays.asList("String", index)));
-            commands.add(new Command(OpCodes.NATIVE_CALL, Arrays.asList("stdout")));
+    public Void visitStatement(RyntraParser.StatementContext ctx) {
+        return visitChildren(ctx);
+    }
+
+    @Override
+    public Void visitFunctionCall(RyntraParser.FunctionCallContext ctx) {
+        String functionName = ctx.IDENTIFIER().getText();
+        
+        // Process builtin functions
+        if (BuiltinFunctions.isBuiltinFunction(functionName)) {
+            generateBuiltinFunctionCall(functionName, ctx);
         }
         
         return null;
     }
 
+    private void generateBuiltinFunctionCall(String functionName, RyntraParser.FunctionCallContext ctx) {
+        switch (functionName) {
+            case "__builtin_print":
+                // Check builtin print
+                if (ctx.expr() != null) {
+                    // Visit the expression
+                    visit(ctx.expr());
+                } else {
+                    // If there's no arguments, simply print the empty line
+                    // Which means the call [LOAD_CONST String ""]
+                    int index = constantPool.addString("");
+                    commands.add(new Command(OpCodes.LOAD_CONST, Arrays.asList("String", index)));
+                }
+                
+                // Generate NATIVE_CALL Command
+                commands.add(new Command(OpCodes.NATIVE_CALL, Arrays.asList("stdout")));
+                break;
+        }
+    }
+
+    // Process literals
     @Override
     public Void visitExpr(RyntraParser.ExprContext ctx) {
         if (ctx.STRING() != null) {
-            // 处理字符串常量
+            // Process string literals
             String stringValue = ctx.STRING().getText();
-            // 移除引号
+            // Remove the quotation mark, or this could affect the generation to `""abc""`
             stringValue = stringValue.substring(1, stringValue.length() - 1);
             
-            // 添加到常量池并获取索引
             int index = constantPool.addString(stringValue);
-            
-            // 生成 LOAD_CONST 指令
             commands.add(new Command(OpCodes.LOAD_CONST, Arrays.asList("String", index)));
             
         } else if (ctx.INT() != null) {
-            // 处理整数常量
+            // Process integer literals
             int intValue = Integer.parseInt(ctx.INT().getText());
-            
-            // 添加到常量池并获取索引
             int index = constantPool.addInt(intValue);
-            
-            // 生成 LOAD_CONST 指令
             commands.add(new Command(OpCodes.LOAD_CONST, Arrays.asList("Int", index)));
         }
         

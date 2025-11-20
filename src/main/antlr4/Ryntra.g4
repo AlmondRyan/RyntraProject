@@ -1,13 +1,15 @@
 grammar Ryntra;
 
 // Parsing Elements
-program: printStmt+ EOF;
-printStmt: PRINT '(' expr ')' ';';
+program: statement+ EOF;
+statement: functionCall ';';
+
+functionCall: IDENTIFIER '(' expr? ')';
 
 expr: STRING | INT;
 
 // Lexical Elements
-PRINT: 'print';
 INT: [0-9]+;
 STRING: '"' .*? '"';
+IDENTIFIER: [a-zA-Z_][a-zA-Z0-9_]*;
 WS: [ \t\r\n]+ -> skip;

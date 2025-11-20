@@ -45,7 +45,6 @@ public class main {
 
             ParseTree tree = parser.program();
             
-            // 检查是否有语法错误，如果有则停止执行
             if (hasErrors[0]) {
                 System.err.println("Compilation failed due to syntax errors. Execution aborted.");
                 return;
@@ -61,13 +60,14 @@ public class main {
             
             // Get Commands and Constant Pool
             List<Command> commands = codeGen.getCommands();
+
             ConstantPool constantPool = codeGen.getConstantPool();
             
             // Execute Commands
             VM vm = new VM();
             vm.execute(commands, constantPool);
         } catch (Exception e) {
-            System.err.println("Error during compilation or execution: " + e.getMessage());
+            System.err.println("Unexpected error during compilation and/or execution: " + e.getMessage());
             e.printStackTrace();
         }
     }

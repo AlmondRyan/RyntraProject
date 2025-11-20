@@ -7,7 +7,7 @@ import java.util.Objects;
 import java.util.Stack;
 
 public class VM {
-    private Stack<Object> stack = new Stack<>();
+    private final Stack<Object> stack = new Stack<>();
     private List<Command> operationCodes;
     private ConstantPool constantPool;
 
@@ -19,9 +19,12 @@ public class VM {
             OpCodes opCode = i.getOperation();
             switch (opCode) {
                 case LOAD_CONST: // LOAD_CONST [type] [index]
+                    // Get type and set the constant object
                     String type = i.getArguments().get(0).toString();
                     Object obj = null;
 
+                    // I don't know whether this is the best approach of coding or not. But this simply
+                    // works.
                     if (Objects.equals(type, "String")) {
                         obj = constantPool.getConstant((Integer) i.getArguments().get(1), String.class);
                     } else if (Objects.equals(type, "Int")) {
@@ -29,24 +32,24 @@ public class VM {
                     }
 
                     stack.push(obj);
-                    break; // 修复：添加缺失的 break
+                    break;
 
                 case NATIVE_CALL: // NATIVE_CALL [call] [arguments]
-                    String call = i.getArguments().get(0).toString();
+                    String call = i.getArguments().getFirst().toString();
                     if (Objects.equals(call, "stdout")) {
-                        // 检查栈是否为空，防止 EmptyStackException
                         if (stack.isEmpty()) {
-                            System.err.println("[Runtime Error]: Attempted to pop from empty stack during stdout call");
+                            System.err.println("[Error]: Attempted to pop from empty stack during NATIVE_CALL command");
                             return;
                         }
-                        // 从栈中弹出参数并打印
+
                         Object arg = stack.pop();
                         System.out.println(arg);
                     }
                     break;
 
-                case HALT:
-                    return; // 停止执行
+                case HALT: // HALT
+                    // This means stop executing.
+                    return;
 
                 default:
                     break;
